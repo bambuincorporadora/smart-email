@@ -15,6 +15,8 @@ VITE_AAD_CLIENT_ID=<client_id_do_app_registrado>
 VITE_AAD_TENANT_ID=<tenant_id_ou_common>
 VITE_AAD_REDIRECT_URI=http://localhost:5173
 VITE_API_BASE=http://localhost:4000
+VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
+VITE_SUPABASE_ANON_KEY=<sua-anon-key>
 ```
 Scopes usados: `Mail.Read` (e `offline_access` no cadastro do app). O login usa popup via MSAL; apos autenticar, o token e enviado ao backend em `Authorization: Bearer <token>`.
 
@@ -74,6 +76,7 @@ Importe o arquivo via Supabase SQL editor ou `psql`: `psql < schema.sql`.
 - Copie `.env.example` para `.env` na raiz e preencha:
   - `SERVER_PORT`, `OPENAI_API_KEY`, `OPENAI_MODEL`
   - `VITE_AAD_CLIENT_ID`, `VITE_AAD_TENANT_ID`, `VITE_AAD_REDIRECT_URI`, `VITE_API_BASE`
+  - `VITE_SUPABASE_URL`, `VITE_SUPABASE_ANON_KEY`
   - `WEB_PORT`
 - Subir local: `docker compose up --build`
   - UI: `http://localhost:${WEB_PORT:-3000}`
