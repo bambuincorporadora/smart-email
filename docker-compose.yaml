@@ -12,8 +12,8 @@ services:
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}
       - OPENAI_MODEL=${OPENAI_MODEL:-gpt-4o-mini}
       - NODE_ENV=production
-    ports:
-      - "${SERVER_PORT:-4000}:4000"
+    expose:
+      - "4000"
 
   web:
     build:
@@ -26,7 +26,7 @@ services:
         - VITE_API_BASE=${VITE_API_BASE:-http://localhost:4000}
         - VITE_SUPABASE_URL=${VITE_SUPABASE_URL}
         - VITE_SUPABASE_ANON_KEY=${VITE_SUPABASE_ANON_KEY}
-    ports:
-      - "${WEB_PORT:-3000}:80"
+    expose:
+      - "80"
     depends_on:
       - server
