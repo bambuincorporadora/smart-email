@@ -1,4 +1,5 @@
 const OpenAI = require('openai');
+const defaultConfig = require('./defaultConfig');
 
 const openaiApiKey = process.env.OPENAI_API_KEY;
 const openaiModel = process.env.OPENAI_MODEL || 'gpt-4o-mini';
@@ -7,21 +8,30 @@ const client = openaiApiKey ? new OpenAI({ apiKey: openaiApiKey }) : null;
 
 const defaultResponse = {
   priority: 'medium',
-  summary: 'Resumo não disponível (configure OPENAI_API_KEY para ativar a IA).',
+  summary: 'Resumo nao disponivel (configure OPENAI_API_KEY para ativar a IA).',
   actionNeeded: false,
-  suggestedAction: 'Nenhuma ação sugerida.',
+  suggestedAction: 'Nenhuma acao sugerida.',
   implicitDeadline: null
 };
 
-const systemPrompt = `
-Você é um assistente que classifica e-mails corporativos. Retorne JSON com:
+function buildSystemPrompt(prompts = {}) {
+  const high = prompts.high || defaultConfig.priorityPrompts.high;
+  const medium = prompts.medium || defaultConfig.priorityPrompts.medium;
+  const low = prompts.low || defaultConfig.priorityPrompts.low;
+
+  return `
+Voce e um assistente que classifica e-mails corporativos. Retorne JSON com:
 priority: high|medium|low
-summary: 2-3 frases em português
+summary: 2-3 frases em portugues
 actionNeeded: true|false
 suggestedAction: frase curta (responder, aprovar, agendar, delegar)
-implicitDeadline: texto curto (hoje, amanhã, data) ou null
-Regras: alta prioridade para chefe/diretoria/cliente importante ou termos urgentes (urgente, prazo, hoje, aprovação, contrato, pagamento) ou pedidos diretos ao usuário.
+implicitDeadline: texto curto (hoje, amanha, data) ou null
+Use as definicoes fornecidas:
+- Alta: ${high}
+- Media: ${medium}
+- Baixa: ${low}
 `.trim();
+}
 
 function buildUserPrompt(message) {
   return `
@@ -32,7 +42,7 @@ Recebido em: ${message.receivedDateTime}
   `.trim();
 }
 
-async function classifyEmail(message) {
+async function classifyEmail(message, config = {}) {
   if (!client) {
     return defaultResponse;
   }
@@ -42,7 +52,7 @@ async function classifyEmail(message) {
       model: openaiModel,
       response_format: { type: 'json_object' },
       messages: [
-        { role: 'system', content: systemPrompt },
+        { role: 'system', content: buildSystemPrompt(config.priorityPrompts) },
         { role: 'user', content: buildUserPrompt(message) }
       ]
     });

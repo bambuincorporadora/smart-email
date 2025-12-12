@@ -68,7 +68,12 @@ async function getPreferences(client, userId) {
     batchSize: defaultConfig.batchSize,
     userEmail: data.email || defaultConfig.userEmail,
     vipSenders: data.vip_senders || defaultConfig.vipSenders,
-    urgentKeywords: data.urgent_keywords || defaultConfig.urgentKeywords
+    urgentKeywords: data.urgent_keywords || defaultConfig.urgentKeywords,
+    priorityPrompts: {
+      high: data.prompt_high ?? defaultConfig.priorityPrompts.high,
+      medium: data.prompt_medium ?? defaultConfig.priorityPrompts.medium,
+      low: data.prompt_low ?? defaultConfig.priorityPrompts.low
+    }
   };
 }
 
@@ -77,7 +82,10 @@ async function upsertPreferences(client, userId, prefs) {
     user_id: userId,
     lookback_days: prefs.lookbackDays ?? defaultConfig.lookbackDays,
     vip_senders: prefs.vipSenders ?? defaultConfig.vipSenders,
-    urgent_keywords: prefs.urgentKeywords ?? defaultConfig.urgentKeywords
+    urgent_keywords: prefs.urgentKeywords ?? defaultConfig.urgentKeywords,
+    prompt_high: prefs.priorityPrompts?.high ?? defaultConfig.priorityPrompts.high,
+    prompt_medium: prefs.priorityPrompts?.medium ?? defaultConfig.priorityPrompts.medium,
+    prompt_low: prefs.priorityPrompts?.low ?? defaultConfig.priorityPrompts.low
   };
   const { error } = await client
     .from('preferences')
@@ -107,7 +115,12 @@ async function saveConfigForUser(accessToken, incoming) {
   const prefs = {
     lookbackDays: incoming.lookbackDays ?? defaultConfig.lookbackDays,
     vipSenders: incoming.vipSenders ?? defaultConfig.vipSenders,
-    urgentKeywords: incoming.urgentKeywords ?? defaultConfig.urgentKeywords
+    urgentKeywords: incoming.urgentKeywords ?? defaultConfig.urgentKeywords,
+    priorityPrompts: {
+      high: incoming.promptHigh ?? defaultConfig.priorityPrompts.high,
+      medium: incoming.promptMedium ?? defaultConfig.priorityPrompts.medium,
+      low: incoming.promptLow ?? defaultConfig.priorityPrompts.low
+    }
   };
   await upsertPreferences(client, userId, prefs);
   return { prefs, userId };

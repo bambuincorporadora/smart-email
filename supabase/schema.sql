@@ -24,13 +24,34 @@ create table if not exists public.preferences (
   lookback_days integer not null default 2,
   vip_senders text[] not null default array[]::text[],
   urgent_keywords text[] not null default array[]::text[],
+  prompt_high text default '',
+  prompt_medium text default '',
+  prompt_low text default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
 
-create trigger preferences_set_updated_at
-before update on public.preferences
-for each row execute function public.set_updated_at();
+alter table public.preferences
+  add column if not exists prompt_high text default '';
+
+alter table public.preferences
+  add column if not exists prompt_medium text default '';
+
+alter table public.preferences
+  add column if not exists prompt_low text default '';
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger
+    where tgname = 'preferences_set_updated_at'
+  ) then
+    create trigger preferences_set_updated_at
+    before update on public.preferences
+    for each row execute function public.set_updated_at();
+  end if;
+end;
+$$;
 
 create table if not exists public.email_messages (
   id uuid primary key default gen_random_uuid(),
@@ -55,9 +76,18 @@ create table if not exists public.email_messages (
   unique (user_id, message_id)
 );
 
-create trigger email_messages_set_updated_at
-before update on public.email_messages
-for each row execute function public.set_updated_at();
+do $$
+begin
+  if not exists (
+    select 1 from pg_trigger
+    where tgname = 'email_messages_set_updated_at'
+  ) then
+    create trigger email_messages_set_updated_at
+    before update on public.email_messages
+    for each row execute function public.set_updated_at();
+  end if;
+end;
+$$;
 
 create index if not exists idx_email_messages_user_priority
   on public.email_messages (user_id, priority);

@@ -11,10 +11,16 @@ module.exports = {
     'urgente',
     'prazo',
     'hoje',
-    'aprovação',
+    'aprovacao',
     'contrato',
     'pagamento',
-    'amanhã',
+    'amanha',
     'deadline'
-  ]
+  ],
+  priorityPrompts: {
+    high:
+      'Alta = chefe/diretoria/cliente VIP; termos urgentes (urgente, prazo, hoje, aprovacao, contrato, pagamento); cobranca direta para o usuario; deadlines imediatos.',
+    medium: 'Media = demandas de equipe ou pedidos de informacao sem urgencia imediata.',
+    low: 'Baixa = comunicados gerais, newsletter, notificacoes automatizadas.'
+  }
 };

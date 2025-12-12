@@ -38,7 +38,12 @@ app.get('/config', async (req, res) => {
 
   try {
     const { prefs } = await configService.loadConfigForUser(token);
-    res.json(prefs);
+    res.json({
+      ...prefs,
+      promptHigh: prefs.priorityPrompts?.high,
+      promptMedium: prefs.priorityPrompts?.medium,
+      promptLow: prefs.priorityPrompts?.low
+    });
   } catch (error) {
     console.error('Error loading config', error);
     if (error.message.includes('Supabase nao configurado')) {
@@ -60,7 +65,12 @@ app.post('/config', async (req, res) => {
   const incoming = req.body || {};
   try {
     const { prefs } = await configService.saveConfigForUser(token, incoming);
-    res.json(prefs);
+    res.json({
+      ...prefs,
+      promptHigh: prefs.priorityPrompts?.high,
+      promptMedium: prefs.priorityPrompts?.medium,
+      promptLow: prefs.priorityPrompts?.low
+    });
   } catch (error) {
     console.error('Error saving config', error);
     if (error.message.includes('Supabase nao configurado')) {

@@ -100,6 +100,9 @@ function App() {
   const [priority, setPriority] = useState('');
   const [vipSendersText, setVipSendersText] = useState('');
   const [urgentKeywordsText, setUrgentKeywordsText] = useState('');
+  const [promptHigh, setPromptHigh] = useState('');
+  const [promptMedium, setPromptMedium] = useState('');
+  const [promptLow, setPromptLow] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -128,6 +131,15 @@ function App() {
       setVipSendersText((data.vipSenders || []).join('\n'));
       setUrgentKeywordsText((data.urgentKeywords || []).join('\n'));
       setDays(data.lookbackDays || days);
+      setPromptHigh(
+        data.promptHigh || data.priorityPrompts?.high || ''
+      );
+      setPromptMedium(
+        data.promptMedium || data.priorityPrompts?.medium || ''
+      );
+      setPromptLow(
+        data.promptLow || data.priorityPrompts?.low || ''
+      );
     } catch (err) {
       setError(err.message);
     }
@@ -223,7 +235,10 @@ function App() {
       const body = {
         vipSenders: normalizeList(vipSendersText),
         urgentKeywords: normalizeList(urgentKeywordsText),
-        lookbackDays: days
+        lookbackDays: days,
+        promptHigh,
+        promptMedium,
+        promptLow
       };
       const res = await fetch(`${API_BASE}/config`, {
         method: 'POST',
@@ -314,6 +329,35 @@ function App() {
                     placeholder="urgente&#10;prazo&#10;hoje&#10;aprovacao"
                     value={urgentKeywordsText}
                     onChange={(e) => setUrgentKeywordsText(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className="config-prompts">
+                <label className="field">
+                  <span>Prompt prioridade ALTA</span>
+                  <textarea
+                    rows={5}
+                    placeholder="Ex.: Alta = chefe/diretoria/cliente VIP, termos urgentes (urgente, prazo, hoje), cobranca direta."
+                    value={promptHigh}
+                    onChange={(e) => setPromptHigh(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>Prompt prioridade MEDIA</span>
+                  <textarea
+                    rows={5}
+                    placeholder="Ex.: Media = demandas normais de equipe, pedidos de info sem urgencia."
+                    value={promptMedium}
+                    onChange={(e) => setPromptMedium(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>Prompt prioridade BAIXA</span>
+                  <textarea
+                    rows={5}
+                    placeholder="Ex.: Baixa = comunicados gerais, newsletter, notificacoes automatizadas."
+                    value={promptLow}
+                    onChange={(e) => setPromptLow(e.target.value)}
                   />
                 </label>
               </div>
