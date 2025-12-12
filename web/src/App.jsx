@@ -102,6 +102,7 @@ function App() {
   const [urgentKeywordsText, setUrgentKeywordsText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [emails, setEmails] = useState(sampleEmails);
 
   const filtered = useMemo(() => {
@@ -114,6 +115,23 @@ function App() {
       .split(/[\n,]/)
       .map((s) => s.trim())
       .filter(Boolean);
+
+  const loadConfigWithToken = async (token) => {
+    setError('');
+    setSuccess('');
+    try {
+      const res = await fetch(`${API_BASE}/config`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (!res.ok) throw new Error(`Erro ao carregar config: ${res.status}`);
+      const data = await res.json();
+      setVipSendersText((data.vipSenders || []).join('\n'));
+      setUrgentKeywordsText((data.urgentKeywords || []).join('\n'));
+      setDays(data.lookbackDays || days);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
 
   const loginMicrosoft = async () => {
     setError('');
@@ -130,6 +148,7 @@ function App() {
         account: activeAccount
       });
       setAccessToken(tokenResponse.accessToken);
+      await loadConfigWithToken(tokenResponse.accessToken);
       await loadEmails(tokenResponse.accessToken);
     } catch (err) {
       setError(`Falha ao autenticar: ${err.message}`);
@@ -185,26 +204,17 @@ function App() {
 
   const loadConfig = async () => {
     setError('');
+    setSuccess('');
     if (!accessToken) {
       setError('Faca login para carregar configuracoes.');
       return;
     }
-    try {
-      const res = await fetch(`${API_BASE}/config`, {
-        headers: { Authorization: `Bearer ${accessToken}` }
-      });
-      if (!res.ok) throw new Error(`Erro ao carregar config: ${res.status}`);
-      const data = await res.json();
-      setVipSendersText((data.vipSenders || []).join('\n'));
-      setUrgentKeywordsText((data.urgentKeywords || []).join('\n'));
-      setDays(data.lookbackDays || days);
-    } catch (err) {
-      setError(err.message);
-    }
+    await loadConfigWithToken(accessToken);
   };
 
   const saveConfig = async () => {
     setError('');
+    setSuccess('');
     if (!accessToken) {
       setError('Faca login para salvar configuracoes.');
       return;
@@ -224,6 +234,7 @@ function App() {
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(`Erro ao salvar config: ${res.status}`);
+      setSuccess('Configuracao salva com sucesso.');
     } catch (err) {
       setError(err.message);
     }
@@ -316,19 +327,8 @@ function App() {
               </div>
             </div>
             {error && <div className="error">{error}</div>}
+            {success && <div className="success">{success}</div>}
           </div>
-        </div>
-        <div className="hero-card">
-          <p className="mini-label">Como funciona</p>
-          <ol>
-            <li>Registre o app no Azure AD (MSAL) com scopes Mail.Read + offline_access.</li>
-            <li>Configure VITE_AAD_CLIENT_ID, VITE_AAD_TENANT_ID e VITE_AAD_REDIRECT_URI.</li>
-            <li>Faca login e carregue os e-mails com prioridade e resumo.</li>
-          </ol>
-          <p className="mini-label">Config (server)</p>
-          <code>POST /config</code>
-          <p className="mini-label">E-mails (server)</p>
-          <code>GET /api/emails</code>
         </div>
       </div>
 

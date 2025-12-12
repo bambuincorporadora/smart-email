@@ -1,16 +1,23 @@
 :root {
-  --bg: #0b1021;
-  --panel: #10172f;
-  --panel-2: #121a36;
-  --text: #e7ecff;
-  --muted: #9fb0d6;
-  --accent: linear-gradient(120deg, #7c6cff, #4cc9f0);
+  --bg: #1f291c; /* verde escuro */
+  --panel: #2a3a2d; /* verde musgo */
+  --panel-2: #303132; /* cinza grafite */
+  --text: #f2f0ec; /* off-white */
+  --muted: #c7c2b9; /* bege acinzentado */
+  --accent: linear-gradient(120deg, #6fdde2, #a45a3f); /* turquesa -> marrom */
+  --badge-high: #a45a3f; /* marrom telha */
+  --badge-medium: #6fdde2; /* turquesa */
+  --badge-low: #d7c5aa; /* bege */
+  --pill-danger-bg: rgba(164, 90, 63, 0.2);
+  --pill-danger-border: rgba(164, 90, 63, 0.4);
+  --pill-warning-bg: rgba(215, 197, 170, 0.2);
+  --pill-warning-border: rgba(215, 197, 170, 0.35);
 }
 
 .page {
   min-height: 100vh;
-  background: radial-gradient(100% 120% at 20% 20%, rgba(124, 108, 255, 0.18), transparent),
-    radial-gradient(120% 120% at 80% 0%, rgba(76, 201, 240, 0.18), transparent),
+  background: radial-gradient(100% 120% at 20% 20%, rgba(111, 221, 226, 0.12), transparent),
+    radial-gradient(120% 120% at 80% 0%, rgba(164, 90, 63, 0.12), transparent),
     var(--bg);
   color: var(--text);
   padding: 40px clamp(16px, 3vw, 56px) 80px;
@@ -25,8 +32,8 @@
 }
 
 .hero-card {
-  background: linear-gradient(145deg, rgba(124, 108, 255, 0.08), rgba(76, 201, 240, 0.08));
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(145deg, rgba(48, 49, 50, 0.65), rgba(42, 58, 45, 0.65));
+  border: 1px solid rgba(255, 255, 255, 0.06);
   border-radius: 16px;
   padding: 20px;
   color: var(--text);
@@ -144,7 +151,7 @@ select:focus {
 .pill-btn.active {
   background: var(--accent);
   border-color: transparent;
-  color: #0b1021;
+  color: #1f291c;
 }
 
 .cta {
@@ -214,7 +221,7 @@ select:focus {
 .badge {
   padding: 6px 10px;
   border-radius: 12px;
-  color: #0b1021;
+  color: #1f291c;
   font-weight: 700;
   font-size: 13px;
 }
@@ -233,7 +240,7 @@ select:focus {
 
 .sender {
   font-size: 14px;
-  color: #9ac8ff;
+  color: #6fdde2;
 }
 
 .subject {
@@ -261,15 +268,15 @@ select:focus {
 }
 
 .pill.danger {
-  background: rgba(255, 77, 109, 0.15);
-  color: #ffb3c2;
-  border-color: rgba(255, 77, 109, 0.25);
+  background: var(--pill-danger-bg);
+  color: #f0d2c6;
+  border-color: var(--pill-danger-border);
 }
 
 .pill.warning {
-  background: rgba(244, 162, 97, 0.15);
-  color: #ffd2a3;
-  border-color: rgba(244, 162, 97, 0.3);
+  background: var(--pill-warning-bg);
+  color: #e6d6bf;
+  border-color: var(--pill-warning-border);
 }
 
 .pill.ghost {
@@ -286,7 +293,7 @@ select:focus {
 }
 
 .link {
-  color: #7cdeff;
+  color: #6fdde2;
   text-decoration: none;
   font-weight: 600;
 }
@@ -301,6 +308,15 @@ select:focus {
   padding: 40px;
   border: 1px dashed rgba(255, 255, 255, 0.2);
   border-radius: 16px;
+}
+
+.success {
+  color: #b6f3c1;
+  background: rgba(76, 201, 240, 0.08);
+  border: 1px solid rgba(76, 201, 240, 0.2);
+  padding: 10px 12px;
+  border-radius: 12px;
+  max-width: 420px;
 }
 
 @media (max-width: 900px) {
