@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import './App.css';
 import { loginRequest, msalInstance, msalReady } from './msal';
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
+const API_BASE = import.meta.env.VITE_API_BASE || window.location.origin;
 
 const priorityMeta = {
   high: { label: 'Alta', color: '#ff4d6d' },

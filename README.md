@@ -14,7 +14,7 @@ Configure variaveis em `web/.env` ou via envs de build:
 VITE_AAD_CLIENT_ID=<client_id_do_app_registrado>
 VITE_AAD_TENANT_ID=<tenant_id_ou_common>
 VITE_AAD_REDIRECT_URI=http://localhost:5173
-VITE_API_BASE=http://localhost:4000
+VITE_API_BASE=http://localhost:4000   # em prod, use a URL publica do backend (https://api.sua-url.com)
 VITE_SUPABASE_URL=https://<seu-projeto>.supabase.co
 VITE_SUPABASE_ANON_KEY=<sua-anon-key>
 ```
