@@ -42,6 +42,8 @@ Importe o arquivo via Supabase SQL editor ou `psql`: `psql < schema.sql`.
    PORT=4000
    OPENAI_API_KEY=...    # chave OpenAI/Azure OpenAI
    OPENAI_MODEL=gpt-4o-mini
+   SUPABASE_URL=...
+   SUPABASE_SERVICE_ROLE_KEY=...
    ```
 2) Instale dependencias e rode:
    ```bash
@@ -70,6 +72,7 @@ Importe o arquivo via Supabase SQL editor ou `psql`: `psql < schema.sql`.
 - Frontend usa MSAL (popup) para obter access token (Mail.Read + offline_access).
 - Envia `Authorization: Bearer <token>` para `GET /api/emails`.
 - Backend usa Graph para buscar inbox, aplica regras (`vipSenders`, `urgentKeywords`) e chama IA para classificar (alta/media/baixa), resumir (2-3 frases) e indicar acao/deadline.
+ - Config per-user: `/config` agora requer token e salva/obtém preferencias no Supabase (tabelas `profiles`, `preferences`). Necessita `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY`.
 
 ## Deploy com Docker Compose / Coolify
 - Arquivo: `docker-compose.yml` (Node 20 + nginx para a UI).

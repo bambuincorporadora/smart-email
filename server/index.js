@@ -7,6 +7,7 @@ const graphService = require('./src/graphService');
 const aiService = require('./src/aiService');
 const rankingService = require('./src/rankingService');
 const defaultConfig = require('./src/defaultConfig');
+const configService = require('./src/configService');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -18,28 +19,49 @@ const state = {
   config: { ...defaultConfig }
 };
 
+function getBearerToken(req) {
+  const authHeader = req.headers.authorization || '';
+  return authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+}
+
 app.get('/health', (_req, res) => {
   res.json({ ok: true, uptime: process.uptime() });
 });
 
-app.get('/config', (_req, res) => {
-  res.json(state.config);
+app.get('/config', async (req, res) => {
+  const token = getBearerToken(req);
+  if (!token) {
+    res.status(401).json({ error: 'Access token required' });
+    return;
+  }
+
+  try {
+    const { prefs } = await configService.loadConfigForUser(token);
+    res.json(prefs);
+  } catch (error) {
+    console.error('Error loading config', error);
+    res.status(500).json({ error: 'Failed to load config', detail: error.message });
+  }
 });
 
-app.post('/config', (req, res) => {
+app.post('/config', async (req, res) => {
+  const token = getBearerToken(req);
+  if (!token) {
+    res.status(401).json({ error: 'Access token required' });
+    return;
+  }
   const incoming = req.body || {};
-  state.config = {
-    ...state.config,
-    ...incoming,
-    vipSenders: incoming.vipSenders || state.config.vipSenders,
-    urgentKeywords: incoming.urgentKeywords || state.config.urgentKeywords
-  };
-  res.json(state.config);
+  try {
+    const { prefs } = await configService.saveConfigForUser(token, incoming);
+    res.json(prefs);
+  } catch (error) {
+    console.error('Error saving config', error);
+    res.status(500).json({ error: 'Failed to save config', detail: error.message });
+  }
 });
 
 app.get('/api/emails', async (req, res) => {
-  const authHeader = req.headers.authorization || '';
-  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : null;
+  const token = getBearerToken(req);
   if (!token) {
     res.status(401).json({ error: 'Access token is required in Authorization header' });
     return;
@@ -50,16 +72,25 @@ app.get('/api/emails', async (req, res) => {
   const priorityFilter = req.query.priority;
 
   try {
+    // load user prefs if supabase configured; fallback to state.config otherwise
+    let userConfig = state.config;
+    try {
+      const { prefs } = await configService.loadConfigForUser(token);
+      userConfig = { ...state.config, ...prefs };
+    } catch (err) {
+      console.warn('Using default config (Supabase not configured or error):', err.message);
+    }
+
     const messages = await graphService.fetchMessages(token, {
       days,
       unreadOnly,
-      top: state.config.batchSize
+      top: userConfig.batchSize
     });
 
     const decorated = await Promise.all(
       messages.map(async (message) => {
-        const rulePriority = rankingService.scoreByRules(message, state.config);
-        const aiResult = await aiService.classifyEmail(message, state.config);
+        const rulePriority = rankingService.scoreByRules(message, userConfig);
+        const aiResult = await aiService.classifyEmail(message, userConfig);
         const finalPriority = rankingService.mergePriority(rulePriority, aiResult.priority);
 
         return {

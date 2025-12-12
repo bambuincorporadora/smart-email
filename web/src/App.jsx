@@ -84,7 +84,7 @@ function EmailCard({ item }) {
       </div>
       <div className="actions">
         <a className="link" href={item.webLink} target="_blank" rel="noreferrer">
-          Abrir no Outlook ->
+          Abrir no Outlook →
         </a>
         <span className="pill ghost">{item.suggestedAction}</span>
       </div>
