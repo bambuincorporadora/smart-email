@@ -18,3 +18,6 @@ export const msalInstance = new PublicClientApplication({
 export const loginRequest = {
   scopes: ['User.Read', 'Mail.Read']
 };
+
+// Promise de inicializacao (MSAL v3 exige inicializar antes de usar).
+export const msalReady = msalInstance.initialize();

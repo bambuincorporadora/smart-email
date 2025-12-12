@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import './App.css';
-import { loginRequest, msalInstance } from './msal';
+import { loginRequest, msalInstance, msalReady } from './msal';
 
 const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:4000';
 
@@ -113,6 +113,7 @@ function App() {
       if (!msalInstance.getConfiguration().auth.clientId) {
         throw new Error('Configure VITE_AAD_CLIENT_ID para habilitar o login.');
       }
+      await msalReady;
       const loginResponse = await msalInstance.loginPopup(loginRequest);
       const activeAccount = loginResponse.account || msalInstance.getAllAccounts()[0];
       setAccount(activeAccount);
