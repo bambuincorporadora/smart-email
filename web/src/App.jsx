@@ -98,6 +98,8 @@ function App() {
   const [days, setDays] = useState(2);
   const [unreadOnly, setUnreadOnly] = useState(true);
   const [priority, setPriority] = useState('');
+  const [vipSendersText, setVipSendersText] = useState('');
+  const [urgentKeywordsText, setUrgentKeywordsText] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [emails, setEmails] = useState(sampleEmails);
@@ -106,6 +108,12 @@ function App() {
     if (!priority) return emails;
     return emails.filter((e) => e.priority === priority);
   }, [emails, priority]);
+
+  const normalizeList = (text) =>
+    text
+      .split(/[\n,]/)
+      .map((s) => s.trim())
+      .filter(Boolean);
 
   const loginMicrosoft = async () => {
     setError('');
@@ -175,6 +183,39 @@ function App() {
     }
   };
 
+  const loadConfig = async () => {
+    setError('');
+    try {
+      const res = await fetch(`${API_BASE}/config`);
+      if (!res.ok) throw new Error(`Erro ao carregar config: ${res.status}`);
+      const data = await res.json();
+      setVipSendersText((data.vipSenders || []).join('\n'));
+      setUrgentKeywordsText((data.urgentKeywords || []).join('\n'));
+      setDays(data.lookbackDays || days);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
+  const saveConfig = async () => {
+    setError('');
+    try {
+      const body = {
+        vipSenders: normalizeList(vipSendersText),
+        urgentKeywords: normalizeList(urgentKeywordsText),
+        lookbackDays: days
+      };
+      const res = await fetch(`${API_BASE}/config`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      if (!res.ok) throw new Error(`Erro ao salvar config: ${res.status}`);
+    } catch (err) {
+      setError(err.message);
+    }
+  };
+
   return (
     <div className="page">
       <div className="hero">
@@ -230,6 +271,36 @@ function App() {
               <button className="pill-btn" onClick={() => loadEmails()} disabled={loading}>
                 {loading ? 'Buscando...' : 'Atualizar lista'}
               </button>
+            </div>
+            <div className="config-panel">
+              <div className="config-fields">
+                <label className="field">
+                  <span>Remetentes VIP (um por linha ou separados por virgula)</span>
+                  <textarea
+                    rows={4}
+                    placeholder="chefe@empresa.com&#10;diretoria@empresa.com"
+                    value={vipSendersText}
+                    onChange={(e) => setVipSendersText(e.target.value)}
+                  />
+                </label>
+                <label className="field">
+                  <span>Palavras-chave de urgencia</span>
+                  <textarea
+                    rows={4}
+                    placeholder="urgente&#10;prazo&#10;hoje&#10;aprovacao"
+                    value={urgentKeywordsText}
+                    onChange={(e) => setUrgentKeywordsText(e.target.value)}
+                  />
+                </label>
+              </div>
+              <div className="row">
+                <button className="pill-btn" onClick={loadConfig} disabled={loading}>
+                  Carregar config
+                </button>
+                <button className="pill-btn" onClick={saveConfig} disabled={loading}>
+                  Salvar config
+                </button>
+              </div>
             </div>
             {error && <div className="error">{error}</div>}
           </div>
