@@ -8,6 +8,7 @@ const aiService = require('./src/aiService');
 const rankingService = require('./src/rankingService');
 const defaultConfig = require('./src/defaultConfig');
 const configService = require('./src/configService');
+const supabase = require('./src/supabaseClient');
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -40,7 +41,13 @@ app.get('/config', async (req, res) => {
     res.json(prefs);
   } catch (error) {
     console.error('Error loading config', error);
-    res.status(500).json({ error: 'Failed to load config', detail: error.message });
+    if (error.message.includes('Supabase nao configurado')) {
+      res.status(503).json({ error: 'Supabase nao configurado para configs por usuario.' });
+    } else if (error.message.includes('Token sem oid/email')) {
+      res.status(400).json({ error: 'Token invalido: falta oid/email.' });
+    } else {
+      res.status(500).json({ error: 'Failed to load config', detail: error.message });
+    }
   }
 });
 
@@ -56,7 +63,13 @@ app.post('/config', async (req, res) => {
     res.json(prefs);
   } catch (error) {
     console.error('Error saving config', error);
-    res.status(500).json({ error: 'Failed to save config', detail: error.message });
+    if (error.message.includes('Supabase nao configurado')) {
+      res.status(503).json({ error: 'Supabase nao configurado para configs por usuario.' });
+    } else if (error.message.includes('Token sem oid/email')) {
+      res.status(400).json({ error: 'Token invalido: falta oid/email.' });
+    } else {
+      res.status(500).json({ error: 'Failed to save config', detail: error.message });
+    }
   }
 });
 
@@ -74,11 +87,13 @@ app.get('/api/emails', async (req, res) => {
   try {
     // load user prefs if supabase configured; fallback to state.config otherwise
     let userConfig = state.config;
-    try {
-      const { prefs } = await configService.loadConfigForUser(token);
-      userConfig = { ...state.config, ...prefs };
-    } catch (err) {
-      console.warn('Using default config (Supabase not configured or error):', err.message);
+    if (supabase.isConfigured()) {
+      try {
+        const { prefs } = await configService.loadConfigForUser(token);
+        userConfig = { ...state.config, ...prefs };
+      } catch (err) {
+        console.warn('Using default config (Supabase error):', err.message);
+      }
     }
 
     const messages = await graphService.fetchMessages(token, {

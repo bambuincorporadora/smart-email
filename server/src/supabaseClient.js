@@ -15,6 +15,11 @@ function getClient() {
   return client;
 }
 
+function isConfigured() {
+  return Boolean(client);
+}
+
 module.exports = {
-  getClient
+  getClient,
+  isConfigured
 };

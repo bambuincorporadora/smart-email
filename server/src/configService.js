@@ -87,6 +87,9 @@ async function upsertPreferences(client, userId, prefs) {
 }
 
 async function loadConfigForUser(accessToken) {
+  if (!supabase.isConfigured()) {
+    throw new Error('Supabase nao configurado');
+  }
   const client = supabase.getClient();
   const userInfo = getUserInfoFromToken(accessToken);
   const userId = await ensureProfile(client, userInfo);
@@ -95,6 +98,9 @@ async function loadConfigForUser(accessToken) {
 }
 
 async function saveConfigForUser(accessToken, incoming) {
+  if (!supabase.isConfigured()) {
+    throw new Error('Supabase nao configurado');
+  }
   const client = supabase.getClient();
   const userInfo = getUserInfoFromToken(accessToken);
   const userId = await ensureProfile(client, userInfo);
