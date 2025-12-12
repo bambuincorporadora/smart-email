@@ -185,8 +185,14 @@ function App() {
 
   const loadConfig = async () => {
     setError('');
+    if (!accessToken) {
+      setError('Faca login para carregar configuracoes.');
+      return;
+    }
     try {
-      const res = await fetch(`${API_BASE}/config`);
+      const res = await fetch(`${API_BASE}/config`, {
+        headers: { Authorization: `Bearer ${accessToken}` }
+      });
       if (!res.ok) throw new Error(`Erro ao carregar config: ${res.status}`);
       const data = await res.json();
       setVipSendersText((data.vipSenders || []).join('\n'));
@@ -199,6 +205,10 @@ function App() {
 
   const saveConfig = async () => {
     setError('');
+    if (!accessToken) {
+      setError('Faca login para salvar configuracoes.');
+      return;
+    }
     try {
       const body = {
         vipSenders: normalizeList(vipSendersText),
@@ -207,7 +217,10 @@ function App() {
       };
       const res = await fetch(`${API_BASE}/config`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${accessToken}`
+        },
         body: JSON.stringify(body)
       });
       if (!res.ok) throw new Error(`Erro ao salvar config: ${res.status}`);
